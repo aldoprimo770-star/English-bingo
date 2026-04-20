@@ -90,8 +90,20 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { gridSize, selectedCategories } = get();
     const totalCells = gridSize * gridSize;
     const filtered = getFilteredWords(selectedCategories);
-    const selected = pickRandom(filtered, Math.max(totalCells * 3, 50));
-    const boardWords = selected.slice(0, totalCells);
+    if (filtered.length === 0) return;
+
+    const poolSize = Math.min(
+      filtered.length,
+      Math.max(totalCells * 3, 50)
+    );
+    const selected = pickRandom(filtered, poolSize);
+    const boardWords: Word[] = selected.slice(
+      0,
+      Math.min(totalCells, selected.length)
+    );
+    while (boardWords.length < totalCells) {
+      boardWords.push(pickRandom(filtered, 1)[0]);
+    }
 
     const board: Cell[][] = [];
     for (let r = 0; r < gridSize; r++) {
